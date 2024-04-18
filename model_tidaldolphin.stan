@@ -57,9 +57,13 @@ model {
 
 generated quantities{
   vector[N] ysim; //simulated observations, given model
+  vector[N] log_likelihood;
 
   for (t in 1:N){
     ysim[t] = normal_rng((x[t]), v[t]);
+    
+    log_likelihood[t] = normal_lpdf(y[t] | x[t], v[t]);
   }
+  
 
 }

@@ -5,6 +5,7 @@ data {
   //int<lower=1, upper= Nt> time_idx[N];
 } 
 
+
 parameters {
   real<lower=0, upper=1> alpha;  //otherwise unexplained autoregression
   real<lower=0> x0; //initial condition
@@ -16,6 +17,7 @@ parameters {
 transformed parameters{
   vector<lower=0>[N] x; //mean concentration present. if not on log scale, x cannot be less than 0
   vector<lower=0>[N] v; // observation variance
+  //vector[N] log_v; //variance of lognormal
 
   //begin time series w initial condition
   x[1] = x0; 
@@ -26,9 +28,10 @@ transformed parameters{
     x[t] = x[t-1]*alpha + beta;    // dolphin DNA sources and sinks  
     
     v[t] = theta*x[t]; // variance
+    
 
   }
-  
+
 
 }
 
@@ -52,9 +55,13 @@ model {
 
 generated quantities{
   vector[N] ysim; //simulated observations, given model
+  vector[N] log_likelihood;
 
   for (t in 1:N){
     ysim[t] = normal_rng((x[t]), v[t]);
+    
+    log_likelihood[t] = normal_lpdf(y[t] | x[t], v[t]);
   }
+  
 
 }
